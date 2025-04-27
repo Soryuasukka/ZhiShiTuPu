@@ -17,69 +17,153 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
+import { useRouter } from 'vue-router'
 
 
 export default {
   setup() {
+    const router = useRouter()
     const container = ref(null)
     const loading = ref(true)
     const searchQuery = ref('')
-    let scene, camera, renderer, labelRenderer, controls, nodes = [], edges = []
-    // const nodeObjects = [] 
+    let scene, camera, renderer, labelRenderer, controls;
+    let nodes = [];
+    let edges = []; // 显式声明
+    const raycaster = new THREE.Raycaster()
+    const mouse = new THREE.Vector2()
+    
 
     const courseData = {
       nodes: [
-      { id: 1, label: '数学分析' },
+        { id: 1, label: '数学分析' },
         { id: 2, label: '并行计算' },
         { id: 3, label: '数值计算及其计算机实现' },
         { id: 4, label: '自然语言处理导论' },
-        { id: 5, label: '操作系统实践(进阶)' }
+        { id: 5, label: '操作系统实践(进阶)' },
+        { id: 6, label: '现代CAD技术(A)' },
+        { id: 7, label: '计算机视觉' },
+        { id: 8, label: '游戏项目实践' },
+        { id: 9, label: '数据挖掘' },
+        { id: 10, label: '多智能体系统与实践' },
+        { id: 11, label: '计算机网络工程' },
+        { id: 12, label: '网络安全基础' },
+        { id: 13, label: '存储技术基础' },
+        { id: 14, label: '模式识别与机器学习' },
+        { id: 15, label: '服务器维护及网站建设' },
+        { id: 16, label: '问题求解与程序设计' },
+        { id: 17, label: '计算机图形学' },
+        { id: 18, label: '云计算实践' },
+        { id: 19, label: '创新创业基础与实践' },
+        { id: 20, label: '多媒体技术' },
+        { id: 21, label: '算法分析与设计' },
+        { id: 22, label: '数字图像处理' },
+        { id: 23, label: '人机交互技术' },
+        { id: 24, label: '数学建模' },
+        { id: 25, label: '数据可视化' },
+        { id: 26, label: '最优化方法' },
+        { id: 27, label: '计算机新技术前沿' },
+        { id: 28, label: '信息系统安全概论' },
+        { id: 29, label: '编程思维与实践' },
+        { id: 30, label: '程序设计原理与C语言' },
+        { id: 31, label: '大学物理B(一)：力学，热学' },
+        { id: 32, label: '大学物理B（二）：电磁学、波动与光学部分' },
+        { id: 33, label: '概率论与数理统计' },
+        { id: 34, label: '计算机导论' },
+        { id: 35, label: '离散数学' },
+        { id: 36, label: '人工智能' },
+        { id: 37, label: '数据结构' },
+        { id: 38, label: '数字逻辑电路' },
+        { id: 39, label: '线性代数' },
+        { id: 40, label: '操作系统' },
+        { id: 41, label: '计算机网络' },
+        { id: 42, label: '嵌入式系统原理与实践' },
+        { id: 43, label: '计算机系统结构' },
+        { id: 44, label: '数据库系统原理与实践' },
+        { id: 45, label: '编译原理与实践' },
+        { id: 46, label: '信息工程伦理' },
+        { id: 47, label: '线性代数进阶' },
+        { id: 48, label: '计算机基础实践' },
+        { id: 49, label: '面向对象程序设计（基于Java）' },
+        { id: 50, label: '面向对象程序设计（基于C++）' },
+        { id: 51, label: '专业英语' },
+        { id: 52, label: '信号与系统' },
+        { id: 53, label: '计算机组成与实践' },
+        { id: 54, label: '生物信息学' },
+        { id: 55, label: '大数据系统' },
+        { id: 56, label: '智能推荐系统' },
+        { id: 57, label: '视觉感知与前沿技术' },
+        { id: 58, label: '统计学习算法导论' },
+        { id: 59, label: '现代CAD技术（B）' },
+        { id: 60, label: '可信机器学习' },
+        { id: 61, label: '计算机动画' },
+        { id: 62, label: '深度学习基础与导论' },
+        { id: 63, label: '强化学习基础' },
+        { id: 64, label: 'AIoT系统设计与实践' },
+        { id: 65, label: '写作与表达' },
+        { id: 66, label: 'python程序设计' },
+        { id: 67, label: '大学英语' }
       ],
       edges: [
-        { from: 1, to: 2 },
-        { from: 2, to: 5 },
-        { from: 4, to: 3 },
-        { from: 5, to: 1 },
-        { from: 1, to: 3 }
+        { from: 34, to: 16 }, { from: 30, to: 16 }, { from: 1, to: 16 },
+        { from: 1, to: 31 }, { from: 1, to: 32 }, { from: 1, to: 17 },
+        { from: 39, to: 17 }, { from: 50, to: 17 }, { from: 37, to: 17 },
+        { from: 11, to: 18 }, { from: 30, to: 21 }, { from: 37, to: 21 },
+        { from: 66, to: 22 }, { from: 30, to: 23 }, { from: 1, to: 24 },
+        { from: 39, to: 24 }, { from: 33, to: 24 }, { from: 29, to: 24 },
+        { from: 37, to: 25 }, { from: 30, to: 25 }, { from: 39, to: 26 },
+        { from: 34, to: 28 }, { from: 11, to: 28 }, { from: 44, to: 28 },
+        { from: 40, to: 28 }, { from: 29, to: 36 }, { from: 30, to: 37 },
+        { from: 33, to: 36 }, { from: 34, to: 36 }, { from: 35, to: 36 },
+        { from: 37, to: 36 }, { from: 1, to: 36 }, { from: 39, to: 35 },
+        { from: 39, to: 36 }, { from: 40, to: 2 }, { from: 53, to: 2 },
+        { from: 1, to: 3 }, { from: 35, to: 3 }, { from: 30, to: 3 },
+        { from: 33, to: 4 }, { from: 36, to: 4 }, { from: 40, to: 5 },
+        { from: 50, to: 6 }, { from: 66, to: 6 }, { from: 22, to: 7 },
+        { from: 37, to: 8 }, { from: 49, to: 8 }, { from: 50, to: 8 },
+        { from: 49, to: 9 }, { from: 50, to: 9 }, { from: 1, to: 9 },
+        { from: 39, to: 9 }, { from: 33, to: 9 }, { from: 30, to: 9 },
+        { from: 1, to: 10 }, { from: 33, to: 10 }, { from: 39, to: 10 },
+        { from: 36, to: 10 }, { from: 41, to: 11 }, { from: 40, to: 11 },
+        { from: 40, to: 12 }, { from: 41, to: 12 }, { from: 41, to: 13 },
+        { from: 1, to: 14 }, { from: 33, to: 14 }, { from: 36, to: 14 },
+        { from: 39, to: 14 }, { from: 30, to: 40 }, { from: 37, to: 40 },
+        { from: 53, to: 40 }, { from: 40, to: 41 }, { from: 43, to: 41 },
+        { from: 30, to: 42 }, { from: 53, to: 42 }, { from: 38, to: 42 },
+        { from: 37, to: 42 }, { from: 40, to: 43 }, { from: 53, to: 43 },
+        { from: 30, to: 43 }, { from: 37, to: 44 }, { from: 40, to: 44 },
+        { from: 30, to: 45 }, { from: 35, to: 45 }, { from: 37, to: 45 },
+        { from: 40, to: 45 }, { from: 41, to: 46 }, { from: 34, to: 46 },
+        { from: 36, to: 46 }, { from: 39, to: 47 }, { from: 30, to: 49 },
+        { from: 30, to: 50 }, { from: 34, to: 51 }, { from: 67, to: 51 },
+        { from: 1, to: 52 }, { from: 36, to: 54 }, { from: 40, to: 55 },
+        { from: 39, to: 55 }, { from: 35, to: 55 }, { from: 37, to: 55 },
+        { from: 44, to: 55 }, { from: 29, to: 55 }, { from: 36, to: 56 },
+        { from: 37, to: 56 }, { from: 36, to: 57 }, { from: 37, to: 57 },
+        { from: 39, to: 57 }, { from: 7, to: 57 }, { from: 1, to: 58 },
+        { from: 33, to: 58 }, { from: 1, to: 59 }, { from: 36, to: 60 },
+        { from: 49, to: 61 }, { from: 22, to: 62 }, { from: 14, to: 62 },
+        { from: 36, to: 63 }, { from: 42, to: 64 }, { from: 4, to: 64 },
+        { from: 14, to: 64 }, { from: 22, to: 64 }
       ]
     }
 
-    function init() {
-      scene = new THREE.Scene()
-      camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000)
-      camera.position.z = 250 // Increased camera distance for wider view
+    function animate() {
+      requestAnimationFrame(animate)
 
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
-      renderer.setSize(window.innerWidth, window.innerHeight)
-      container.value.appendChild(renderer.domElement)
+      nodes.forEach(node => {
+        node.rotation.x += 0.005
+        node.rotation.y += 0.005
+      })
 
-      labelRenderer = new CSS2DRenderer()
-      labelRenderer.setSize(window.innerWidth, window.innerHeight)
-      labelRenderer.domElement.style.position = 'absolute'
-      labelRenderer.domElement.style.top = '30px'
-      container.value.appendChild(labelRenderer.domElement)
+      edges.forEach(edge => {
+        edge.material.opacity = (Math.sin(Date.now() * 0.001) + 1) * 0.3 + 0.3
+      })
 
-      controls = new OrbitControls(camera, labelRenderer.domElement)
-      controls.enableDamping = true
-      controls.dampingFactor = 0.05
-      controls.minDistance = 10
-      controls.maxDistance = 500
-
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
-      scene.add(ambientLight)
-
-      const pointLight = new THREE.PointLight(0xffffff, 1)
-      pointLight.position.set(10, 10, 10)
-      scene.add(pointLight)
-
-      createGraph()
-      createStarfield()
-
-      loading.value = false
-
-      window.addEventListener('resize', onWindowResize)
+      controls.update()
+      renderer.render(scene, camera)
+      labelRenderer.render(scene, camera)
     }
-
+    
     function searchNode() {
       const query = searchQuery.value.trim()
       if (!query) return
@@ -133,84 +217,175 @@ export default {
       }
     }
 
+    function onMouseClick(event) {
+      // 计算正确鼠标坐标
+      const rect = renderer.domElement.getBoundingClientRect()
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1
 
-    function createGraph() {
-      const sphereGeometry = new THREE.SphereGeometry(1, 32, 32)
-      const sphereMaterial = new THREE.MeshPhongMaterial({ 
+      raycaster.setFromCamera(mouse, camera)
+      const intersects = raycaster.intersectObjects(nodes)
+
+      if (intersects.length > 0) {
+        router.push({ name: 'course' }) // 移除参数传递
+      }
+    }
+
+    // 初始化Three.js场景
+    function init() {
+      scene = new THREE.Scene()
+      camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000)
+      camera.position.z = 250
+
+      // 初始化WebGL渲染器
+      renderer = new THREE.WebGLRenderer({ 
+        antialias: true,
+        alpha: true,
+        canvas: container.value.querySelector('canvas') || undefined
+      })
+      renderer.setSize(window.innerWidth, window.innerHeight)
+      renderer.domElement.style.position = 'absolute'
+      container.value.appendChild(renderer.domElement)
+
+      // 初始化CSS2D标签渲染器
+      labelRenderer = new CSS2DRenderer()
+      labelRenderer.setSize(window.innerWidth, window.innerHeight)
+      labelRenderer.domElement.style.position = 'absolute'
+      labelRenderer.domElement.style.top = '0'
+      labelRenderer.domElement.style.pointerEvents = 'none' // 关键设置
+      labelRenderer.domElement.classList.add('label-renderer') // 添加CSS类
+      container.value.appendChild(labelRenderer.domElement)
+
+      // 初始化控制器（关键修改部分）
+      controls = new OrbitControls(camera, renderer.domElement) // 使用WebGL渲染器作为事件源
+      controls.enableDamping = true
+      controls.dampingFactor = 0.05
+      controls.screenSpacePanning = true // 启用屏幕空间平移
+      controls.minDistance = 50
+      controls.maxDistance = 500
+
+      // 配置鼠标按键（关键）
+      controls.mouseButtons = {
+        LEFT: THREE.MOUSE.ROTATE,    // 左键旋转
+        MIDDLE: THREE.MOUSE.DOLLY,   // 中键缩放
+        RIGHT: THREE.MOUSE.PAN       // 右键平移
+      }
+
+      // 配置滚轮缩放
+      controls.enableZoom = true
+      controls.zoomSpeed = 1.0
+
+      // 灯光设置
+      scene.add(new THREE.AmbientLight(0xffffff, 0.5))
+      const pointLight = new THREE.PointLight(0xffffff, 1)
+      pointLight.position.set(10, 10, 10)
+      scene.add(pointLight)
+
+      createGraph();
+      createStarfield(); // 添加星空背景
+
+      // 事件监听
+      window.addEventListener('resize', onWindowResize)
+      renderer.domElement.addEventListener('click', onMouseClick) // 只保留这一个点击监听
+
+      // 调试输出控制器状态
+      console.log('Controls initialized:', {
+        rotate: controls.enableRotate,
+        zoom: controls.enableZoom,
+        pan: controls.enablePan,
+        damping: controls.enableDamping
+      })
+    }
+    // 标签创建辅助函数
+    const createLabelElement = (text) => {
+      const labelDiv = document.createElement('div')
+      labelDiv.className = 'node-label'
+      labelDiv.textContent = text
+      return labelDiv
+    }
+
+    // 创建图形元素
+    const createGraph = () => {
+      // 清除旧节点和边
+      nodes.forEach(node => scene.remove(node))
+      edges.forEach(edge => scene.remove(edge))
+      nodes = []
+      edges = []
+
+      // 创建节点
+      const sphereGeometry = new THREE.SphereGeometry(2, 32, 32)
+      const sphereMaterial = new THREE.MeshPhongMaterial({
         color: 0x00aaff,
         emissive: 0x0044aa,
         specular: 0xffffff,
         shininess: 100
       })
 
-      const radius = 120 // Increased radius for a wider graph
-      const phi = Math.PI * (3 - Math.sqrt(5)) // golden angle
+      const radius = 120
+      const phi = Math.PI * (3 - Math.sqrt(5)) // 黄金角度
 
       courseData.nodes.forEach((node, index) => {
-        const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial)
-        
-        // Modified distribution algorithm
-        const t = index / (courseData.nodes.length - 1)
+        // 节点位置计算
+        const t = index / courseData.nodes.length
         const inclination = Math.acos(1 - 2 * t)
         const azimuth = phi * index
 
-        const x = radius * Math.sin(inclination) * Math.cos(azimuth)
-        const y = radius * Math.sin(inclination) * Math.sin(azimuth)
-        const z = radius * Math.cos(inclination)
+        const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial)
+        sphere.position.set(
+          radius * Math.sin(inclination) * Math.cos(azimuth),
+          radius * Math.sin(inclination) * Math.sin(azimuth),
+          radius * Math.cos(inclination)
+        )
+        sphere.userData = { id: node.id } // 存储课程ID
 
-        sphere.position.set(x, y, z)
+        // 添加节点到场景
         scene.add(sphere)
         nodes.push(sphere)
 
-        const labelDiv = document.createElement('div')
-        labelDiv.className = 'node-label'
-        labelDiv.textContent = node.label
-        const label = new CSS2DObject(labelDiv)
+        // 创建CSS2D标签（实际使用CSS2DObject）
+        // eslint-disable-next-line no-unused-vars
+        const label = new CSS2DObject(createLabelElement(node.label))
         label.position.copy(sphere.position)
         scene.add(label)
       })
 
-      const edgeMaterial = new THREE.LineBasicMaterial({ 
+      // 创建边
+      const edgeMaterial = new THREE.LineBasicMaterial({
         color: 0x00ffff,
         transparent: true,
         opacity: 0.6
       })
 
       courseData.edges.forEach(edge => {
-        const startNode = courseData.nodes.find(n => n.id === edge.from)
-        const endNode = courseData.nodes.find(n => n.id === edge.to)
-        
+        const startNode = nodes.find(n => n.userData.id === edge.from)
+        const endNode = nodes.find(n => n.userData.id === edge.to)
+
         if (startNode && endNode) {
-          const start = nodes[courseData.nodes.indexOf(startNode)].position
-          const end = nodes[courseData.nodes.indexOf(endNode)].position
+          // 创建贝塞尔曲线
+          const start = startNode.position
+          const end = endNode.position
+          const mid = new THREE.Vector3()
+            .addVectors(start, end)
+            .multiplyScalar(0.5)
+            .add(new THREE.Vector3(
+              (Math.random() - 0.5) * 20,
+              (Math.random() - 0.5) * 20,
+              (Math.random() - 0.5) * 20
+            ))
 
-          const mid = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5)
-          mid.add(new THREE.Vector3(
-            (Math.random() - 0.5) * 20,
-            (Math.random() - 0.5) * 20,
-            (Math.random() - 0.5) * 20
-          ))
-
+          // 创建线对象
           const curve = new THREE.QuadraticBezierCurve3(start, mid, end)
           const points = curve.getPoints(50)
           const geometry = new THREE.BufferGeometry().setFromPoints(points)
-          // eslint-disable-next-line no-unused-vars
           const line = new THREE.Line(geometry, edgeMaterial)
-          //scene.add(line)
-          //edges.push(line)
-
-          // Add arrow
-          const dir = new THREE.Vector3().subVectors(end, start).normalize()
-          //const arrowHelper = new THREE.ArrowHelper(dir, mid, 5, 0x00ffff, 1.5, 0.75)
-          const arrowHelper = new THREE.ArrowHelper(dir, start, end.clone().sub(start).length()*0.99, 0x00ffff, 1, 1)
-
           
-          scene.add(arrowHelper)
+          scene.add(line)
+          edges.push(line) // 必须添加到edges数组
         }
       })
     }
 
-    function createStarfield() {
+    const createStarfield = () =>{
       const starGeometry = new THREE.BufferGeometry()
       const starMaterial = new THREE.PointsMaterial({
         color: 0xffffff,
@@ -239,35 +414,21 @@ export default {
       labelRenderer.setSize(window.innerWidth, window.innerHeight)
     }
 
-    function animate() {
-      requestAnimationFrame(animate)
-
-      nodes.forEach(node => {
-        node.rotation.x += 0.005
-        node.rotation.y += 0.005
-      })
-
-      edges.forEach(edge => {
-        edge.material.opacity = (Math.sin(Date.now() * 0.001) + 1) * 0.3 + 0.3
-      })
-
-      controls.update()
-      renderer.render(scene, camera)
-      labelRenderer.render(scene, camera)
-    }
 
     onMounted(() => {
-      init()
-      animate()
+      if (!container.value.querySelector('canvas')) {
+        init()
+        animate()
+      }
     })
 
     onBeforeUnmount(() => {
       window.removeEventListener('resize', onWindowResize)
+      container.value.removeEventListener('click', onMouseClick)
       controls.dispose()
     })
 
     return { container, loading, searchQuery, searchNode }
-
   }
 }
 </script>
@@ -319,5 +480,16 @@ export default {
   pointer-events: none;
   white-space: nowrap;
   font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+/* 确保层级关系 */
+.graph-container canvas {
+  position: relative;
+  z-index: 1;
+}
+
+.label-renderer {
+  z-index: 2;
+  pointer-events: none !important;
 }
 </style>
