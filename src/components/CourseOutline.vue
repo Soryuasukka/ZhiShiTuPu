@@ -13,14 +13,12 @@
                 <h1 class="course-title">概率论与数理统计</h1>
                 <div class="course-details">
                   <div class="detail-group">
-                  </div>
-                  <div class="detail-group">
                     <div class="detail"><strong>开课老师:</strong> 赵静</div>
                     <div class="detail"><strong>课程性质:</strong> 学科必修</div>
                   </div>
                   <div class="detail-group">
                     <div class="detail"><strong>先修课程:</strong> 数学分析</div>
-                    <div class="detail"><strong>学时/学分:</strong>  54/3</div>
+                    <div class="detail"><strong>学时/学分:</strong> 54/3</div>
                   </div>
                 </div>
                 <div class="learning-advices">
@@ -39,19 +37,12 @@
       </div>
       <SideBar />
     </div>
-
-    <!-- InnerDagre 合并后的部分 -->
-    <div class="GraphVisualization">
-      <div id="mynetwork"></div>
-    </div>
   </div>
 </template>
 
 <script>
-import NavBar from './NavBar.vue';
-import SideBar from './SideBar.vue';
-import { ref, onMounted } from 'vue';
-import vis from 'vis-network/standalone/umd/vis-network.min.js';
+import NavBar from '../components/NavBar.vue';
+import SideBar from '../components/SideBar.vue';
 
 export default {
   components: {
@@ -63,76 +54,29 @@ export default {
       courseImage: require('@/assets/STAT0031121004.png'),
     };
   },
-  setup() {
-    const network = ref(null);
-
-    // 网络数据
-    const nodes = [
-      { id: 1, label: 'Node 1', url: 'https://www.example.com/page1' },
-      { id: 2, label: 'Node 2', url: 'https://www.example.com/page2' },
-      { id: 3, label: 'Node 3', url: 'https://www.example.com/page3' },
-    ];
-
-    const edges = [
-      { from: 1, to: 2, arrows: 'to' },
-      { from: 2, to: 3, arrows: 'to' },
-    ];
-
-    // 初始化网络图
-    onMounted(() => {
-      const container = document.getElementById('mynetwork');
-      const data = { nodes, edges };
-      const options = {
-        nodes: {
-          shape: 'dot',
-          size: 16,
-        },
-        edges: {
-          width: 2,
-        },
-        height: '100%',
-        width: '100%',
-      };
-      network.value = new vis.Network(container, data, options);
-
-      // 添加点击事件
-      network.value.on('click', function (event) {
-        const { nodes: clickedNodes } = event;
-        if (clickedNodes.length > 0) {
-          const nodeId = clickedNodes[0];
-          // 获取被点击节点的信息
-          const node = nodes.find(n => n.id === nodeId);
-          if (node && node.url) {
-            // 使用 URL 跳转
-            window.location.href = node.url;
-          }
-        }
-      });
-    });
-
-    return { network };
-  },
 };
 </script>
 
 <style scoped>
 #app {
-  font-family: Arial, sans-serif;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  background-color: #f5f5f5;
+  color: #333;
 }
 
 .main-container {
   display: flex;
-  padding-top: 60px;
+  padding-top: 80px;
   justify-content: center;
 }
 
 .content-container {
   width: 60%;
-  background-color: #f9f9f9;
+  background-color: #ffffff;
   padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  margin-right: 15%;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-right: 250px;
 }
 
 .content {
@@ -142,82 +86,113 @@ export default {
 
 .course-info {
   display: flex;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
 }
 
 .course-image-container {
-  width: 40%;
+  width: 35%;
   margin-right: 20px;
 }
 
 .course-image {
   width: 100%;
   height: auto;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .course-details-container {
-  width: 60%;
+  width: 65%;
   display: flex;
-  align-items: center;
+  flex-direction: column;
 }
 
 .course-details-content {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  height: 100%;
-  width: 100%;
+  justify-content: flex-start;
 }
 
 .course-title {
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 10px;
-  margin-left: -20px;
+  font-size: 26px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 20px;
 }
 
 .course-details {
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 
 .detail-group {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 40px;
+  margin-bottom: 16px;
 }
 
 .detail {
   flex: 1;
+  font-size: 16px;
+  color: #555;
 }
 
-.detail + .detail {
-  margin-left: 40px;
+.learning-advices {
+  margin-top: 20px;
+  font-size: 16px;
+  line-height: 1.8;
+  color: #555;
 }
 
 .course-outline {
-  margin-top: 20px;
-  text-align: left;
+  margin-top: 30px;
 }
 
-/* InnerDagre 样式 */
-.GraphVisualization {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 300px;
-  height: 300px;
-  border-radius: 10px;
-  background-color: #ffffff;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  border: 2px solid #007bff;
-  padding: 0;
-  box-sizing: border-box;
+.course-outline h2 {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #333;
 }
 
-#mynetwork {
-  width: 100%;
-  height: 100%;
+.course-outline ol {
+  margin-left: 20px;
+}
+
+.course-outline li {
+  font-size: 16px;
+  color: #555;
+  margin-bottom: 10px;
+}
+
+@media (max-width: 768px) {
+  .main-container {
+    padding-top: 70px;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+
+  .content-container {
+    width: 90%;
+    margin-right: 0;
+  }
+
+  .course-title {
+    font-size: 22px;
+  }
+
+  .course-details-container {
+    width: 100%;
+  }
+
+  .course-info {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .course-image-container {
+    width: 80%;
+    margin-right: 0;
+    margin-bottom: 20px;
+  }
 }
 </style>
