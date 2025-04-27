@@ -17,7 +17,6 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer'
-// import * as TWEEN from '@tweenjs/tween.js'
 
 
 export default {
@@ -85,15 +84,51 @@ export default {
       const query = searchQuery.value.trim()
       if (!query) return
 
+      nodes.forEach(node => {
+        node.scale.set(1, 1, 1) // 重置所有节点大小
+      })
+
       const targetIndex = courseData.nodes.findIndex(node => node.label.includes(query))
       if (targetIndex !== -1) {
         const targetSphere = nodes[targetIndex]
         if (targetSphere) {
-          // 相机平滑飞过去
           const targetPosition = targetSphere.position.clone()
-          const direction = targetPosition.clone().normalize()
-          camera.position.copy(direction.multiplyScalar(250)) // 保持合适的距离
-          controls.target.copy(targetPosition)
+          const targetCameraPosition = targetPosition.clone().multiplyScalar(2) // 想要去的新相机位置
+
+          let progress = 0 // 进度
+          const duration = 30 // 控制 lerp 的次数，越大越慢越平滑
+
+          // 记录初始位置
+          const startCameraPosition = camera.position.clone()
+          const startTarget = controls.target.clone()
+          const startScale = targetSphere.scale.clone()
+
+          const animate = () => {
+            if (progress < 1) {
+              progress += 1 / duration
+
+              // lerp 相机位置
+              camera.position.lerpVectors(startCameraPosition, targetCameraPosition, progress)
+
+              // lerp controls.target
+              controls.target.lerpVectors(startTarget, targetPosition, progress)
+
+              // lerp 放大节点
+              targetSphere.scale.lerpVectors(startScale, new THREE.Vector3(2, 2, 2), progress)
+
+              controls.update() // 刷新 controls（非常重要！）
+
+              requestAnimationFrame(animate)
+            } else {
+              // 动画完成后，确保位置最终精确到位
+              camera.position.copy(targetCameraPosition)
+              controls.target.copy(targetPosition)
+              targetSphere.scale.set(2, 2, 2)
+              controls.update()
+            }
+          }
+
+          animate()
         }
       }
     }
